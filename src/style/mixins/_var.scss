@@ -1,0 +1,98 @@
+// 该_var用于写于css Var相关的一些mixin混入函数
+@use "../common/var.scss" as *;
+@use "../common/config.scss" as *;
+@use "sass:map";
+@use "./function" as *;
+
+@mixin set-css-color-rgb($type) {
+  // 定义颜色
+  $color: map.get($colors, $type);
+}
+
+@mixin set-css-color-type($color, $type) {
+  // 从$colors中获取 对应的$type的值 如果返回值是个对象 就取对象中'base'的值
+  // 生成--el-color-primary:
+  @include set-css-var-value(("color", $type), map.get($colors, $type));
+
+  @each $i in (3, 5, 7, 8, 9) {
+    @include set-css-var-value(
+      // --el-color-type-light-num:
+      ("color", $type, "light", $i),
+      map.get($colors, "#{$type}-light-#{$i}")
+    );
+  }
+  @include set-css-var-value(
+    ('color',$type,'dark',2),
+    map.get($colors,"#{$type}-dark-2")
+  )
+}
+
+// 针对参数不是列表的
+@mixin set-css-var-value($name, $value) {
+  // 设置设置全局的自定义属性 不需要block
+  #{joinVarName($name)}: #{$value};
+}
+
+// 这个函数的租用：连接变量名称？ 接收一个list作为参数
+// 定义$name变量，值是"--el"这种
+// 循环遍历list 如果list中的值不为空 那就生成 --el-$item1-$item2-$item3...
+
+@function joinVarName($list) {
+  $name: "--" + $namespace;
+
+  @each $item in $list {
+    @if $item != "" {
+      $name: $name + "-" + $item;
+    }
+  }
+
+  @return $name;
+  // --el-$item1-$item2-$item3...
+}
+
+// 获得根据传入的参数生成自定义属性标准名 主要作用在于收集多个参数变成列表
+// 返回 --el-item1-item2...
+// @function getCssVarName($args...) {
+//   @return joinVarName($args);
+// }
+
+// getCssVarName是用来获取自定义属性的key值--getCssVar是根据自定义属性名变成var()变量
+// @function getCssVar($args...) {
+//   @return var(#{joinVarName($args)});
+// }
+
+// 设定组件的css变量 接收一个name和一组变量
+// @mixin set-component-css-var($name, $variables) {
+//   @each $attribute, $value in $variables {
+//     // attribute应该是plain loading这些把
+//     @if $attribute == 'default' {
+//       // 前面会生成一个--el-$item1-$item2-$item3... ：value形式
+//       // 这样生成的也是个变量吗？
+//       #{getCssVarName($name)}: #{$value};
+//     } @else {
+//       #{getCssVarName($name, $attribute)}: #{$value};
+//     }
+//   }
+// }
+// 先根据传入的name生成--el-button的自定义属性名称
+// 针对参数是列表的 结果的欧式--el-name-xxx
+@mixin set-component-css-var($name, $variables) {
+  @each $attribute, $value in $variables {
+    // attribute应该是plain loading这些把
+    // 前面会生成一个--el-$item1-$item2-$item3... ：value形式
+    @if $attribute== "default" {
+      #{getCssVarName($name)}: #{$value};
+    } @else {
+      #{getCssVarName($name, $attribute)}: #{$value};
+    }
+  }
+}
+
+// $var和$gvar都是一个列表 把列表都串在一起
+// @include css-var-from-global(('button', 'text-color'), ('color', $type))
+// --el-button-text-color: var(--el-color-#{$type});
+@mixin css-var-from-global($var, $gVar) {
+  $varName: joinVarName($var);
+  $gVarName: joinVarName($gVar);
+  #{$varName}: var(#{$gVarName});
+}

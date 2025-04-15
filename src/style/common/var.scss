@@ -1,0 +1,261 @@
+@use "sass:math";
+@use "sass:map";
+@use "sass:color";
+@use "../mixins/function" as *;
+// 该var.scss用于写通用列表集合
+$colors: (
+  "primary": #409eff,
+  "success": #67c23a,
+  "warning": #e6a23c,
+  "danger": #f56c6c,
+);
+$color-white: white;
+$color-black: black;
+$types: ("primary", "success", "warning", "danger");
+
+// 该函数的作用是将指定颜色和白色/黑色进行一定比例混合 创造出不同等级的light和dark样式
+@mixin set-color-mix-level(
+  $type,
+  $number,
+  $mode: "light",
+  $mix-color: $color-white
+) {
+  // 生成一个--el-primary-light-i的名称
+  $colors: map.merge(
+    (
+      "#{$type}-#{$mode}-#{$number}":
+        color.mix($mix-color, map.get($colors, $type), $number * 10%),
+    ),
+    $colors
+  ) !global;
+}
+
+// @include set-color-mix-level('primary', 5);
+
+// 然后遍历$types去调用set-color-mix-level
+// 生成light对应的颜色
+@each $type in $types {
+  @for $i from 1 through 9 {
+    @include set-color-mix-level($type, $i);
+  }
+}
+@each $type in $types {
+  @include set-color-mix-level($type, 2, "dark", $color-black);
+}
+
+// disabled
+$disabled: (
+  "bg-color": getCssVar("fill-color", "light"),
+  "text-color": getCssVar("text-color", "placeholder"),
+  "border-color": getCssVar("border-color", "light"),
+);
+
+$text-color: (
+  // 文字样式：
+  "primary": #303133,
+  "regular": #606266,
+  "secondary": #909399,
+  "placeholder": #a8abb2,
+  "disabled": #c0c4cc
+);
+
+$border-color: (
+  "": #dcdfe6,
+  "light": #e4e7ed,
+  "lighter": #ebeef5,
+  "extra-light": #f2f6fc,
+  "dark": #d4d7de,
+  "darker": #cdd0d6,
+);
+// @debug $colors;
+// $border
+$border-width: 1px !default;
+$border-style: solid !default;
+// 圆角的样式 会根据circle="small"带入不同的值 --el-button-radius-base --el-button-radius-small
+// 还是直接去替换var变量的值
+
+$border-radius: (
+  "base": 4px,
+  "small": 2px,
+  "round": 20px,
+  "circle": 100%,
+);
+
+// 默认组件的大小
+$common-component-size: (
+  "large": 40px,
+  "small": 24px,
+  "default": 32px,
+);
+
+$input-height: $common-component-size;
+$fill-color: (
+  // 默认值 使用getCssVar==>
+  "": #f0f2f5,
+  "light": #f5f7fa,
+  "lighter": #fafafa,
+  "extra-light": #fafcff,
+  "dark": #ebedf0,
+  "darker": #e6e8eb,
+  "blank": #ffffff
+);
+
+$mask-color: (
+  "": rgba(255, 255, 255, 0.9),
+  "extra-light": rgba(255, 255, 255, 0.3),
+);
+
+$border-color-hover: getCssVar("text-color", "disabled") !default;
+
+$disabled: (
+  "bg-color": getCssVar("fill-color", "light"),
+  "text-color": getCssVar("text-color", "placeholder"),
+  "border-color": getCssVar("border-color", "light"),
+);
+
+// $input: (
+//  input的样式需要哪些 还有哪些需要变化
+// 为了能让这些样式 这些基本都是默认值,要从global_var中获取 并且要指定颜色
+// 文字颜色
+// 'text-color' : getCssVar('text-color', 'regular'),
+// 边框
+// 'border':getCssVar('border'),
+// // 边框颜色和边框圆角 默认为黑色
+// 'border-radius':getCssVar('border-'),
+// // border-color后面没有内容就是默认值 命名都是统一的
+// 'border-color':getCssVar('border-color'),
+// // 背景颜色 默认数值颜色 背景用填充颜色
+// 'bg-color':getCssVar('fill-color', 'blank'),
+// // placeholder的文字颜色 用什么颜色 在text-color中已经定义好了给placeholder的颜色了
+// 'placeholder-color':getCssVar("text-color", "placeholder"),
+// ),
+$font-size: (
+  "extra-large": 20px,
+  "large": 18px,
+  "medium": 16px,
+  "base": 14px,
+  "small": 13px,
+  "extra-small": 12px,
+);
+// 定义一个组件ommon-component-size的通用大小
+$input: (
+  // "text-color":getCssVar('text-color', 'regular'),
+  "text-color": getCssVar("text-color-regular"),
+  "width": 100%,
+  "border-color": getCssVar("border-color"),
+  "hover-border-color": getCssvar("border-color-hover")
+);
+$transition-duration: (
+  "": 0.3s,
+  "fast": 0.2s,
+);
+$transition-function: (
+  "ease-in-out-bezier": cubic-bezier(0.645, 0.045, 0.355, 1),
+  "fast-bezier": cubic-bezier(0.23, 1, 0.32, 1),
+);
+
+$transition: map.merge(
+  (
+    "all": all getCssVar("transition-duration")
+      getCssVar("transition-function-ease-in-out-bezier"),
+    "fade": opacity getCssVar("transition-duration")
+      getCssVar("transition-function-fast-bezier"),
+    "md-fade": (
+      transform getCssVar("transition-duration")
+        getCssVar("transition-function-fast-bezier"),
+      opacity getCssVar("transition-duration")
+        getCssVar("transition-function-fast-bezier"),
+    ),
+    "fade-linear": opacity getCssVar("transition-duration-fast") linear,
+    "border": border-color getCssVar("transition-duration-fast")
+      getCssVar("transition-function-ease-in-out-bezier"),
+    "box-shadow": box-shadow getCssVar("transition-duration-fast")
+      getCssVar("transition-function-ease-in-out-bezier"),
+    "color": color getCssVar("transition-duration-fast")
+      getCssVar("transition-function-ease-in-out-bezier"),
+  ),
+  ()
+);
+
+$radio: (
+  // text值
+  "text-color": getCssVar("text-color", "regular"),
+  "font-weight": getCssVar(),
+  "font-size": getCssVar("font-size", "base"),
+  "input-border": getCssVar("border"),
+  "input-border-color-hover": getCssVar("color-primary")
+);
+
+$radio-disabled: (
+  // disabled状态下 radio的颜色样式
+  // 分两种 一种是选中 一种是没有选中
+  "border-color": getCssVar("disabled-border-color"),
+  "checked-border-color": getCssVar("disabled-border-color"),
+  // 背景颜色也有变化
+  "bg-color": getCssVar("disabled-bg-color"),
+  "checked-bg-color": getCssVar("diasbled-bg-color"),
+  // placeholder的样式也变化 这是属于text-color
+);
+
+$rate: (
+  // 首先里面都是图标ICON 所以需要放大和缩小 使用font-weight
+  "font-size": 10px,
+  // 当active时使用的颜色填充
+  "fill-color": rgba(241, 165, 1, 0.923),
+  //  'fill-color':#000000,
+);
+
+$popper-content: (
+  "bg-color": getCssVar("text-color-primary"),
+  "text-color": white,
+);
+
+$cascader: (
+  // 默认情况下的背景颜色
+  "node-bg-color-hover": getCssVar("fill-color", "light"),
+  "menu-selected-text-color": getCssVar("color-primary"),
+  "node-color-disabled": getCssVar("text-color-placeholder")
+);
+$button-border-width: $border-width !default;
+$button-padding-vertical: (
+  "default": 9px,
+  "large": 13px,
+  "small": 6px,
+);
+$button-padding-horizontal: (
+  "default": 16px,
+  "large": 20px,
+  "small": 12px,
+);
+$button-border-radius: (
+  "default": map.get($border-radius, "base"),
+  "large": map.get($border-radius, "base"),
+  "small": calc(#{map.get($border-radius, "base")} - 1px),
+);
+$button-font-size: (
+  "default": getCssVar("font-size", "base"),
+  "large": getCssVar("font-size", "base"),
+  "small": 12px,
+);
+// $button由 button.scss 的b(block)函数下的set-component-css-var('block',$button)遍历
+$button: (
+  // var(--el-font-weight-primary)
+  "font-weight": getCssVar("font-weight-primary"),
+  // font-weight:var(--el-font-weight-primary)
+  // 'bg-color':getCssVar('border-color'),
+  "text-color": getCssVar("text-color", "regular"),
+  // 'bg-color' : getCssVar('fill-color', 'blank'),
+  "bg-color": white,
+  "border-color":getCssVar('border-color'),
+  "hover-text-color": getCssVar("color-primary"),
+  "hover-bg-color": getCssVar("color-primary", "light-9"),
+  "hover-border-color": getCssVar("color-primary-light-7"),
+  // 添加disabled样式
+  "disabled-text-color": getCssVar("text-color","disabled"),
+  // disabled-text-color 从全局global中获取 所以全局:root中必须要有这个disabled
+  // 而全局又是依赖当前文件中的变量生成自定义属性的 所以要在当前位置 新增一个$disabled相关的所有类
+  "disabled-bg-color": getCssVar("fill-color", "blank"),
+  "disabled-border-color": getCssVar("border-color-light"),
+  "active-bg-color":getCssVar("button-hover-bg-color")
+  
+);

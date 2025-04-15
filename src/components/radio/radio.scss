@@ -1,0 +1,128 @@
+// 先引入要使用的功能和函数
+@use 'sass:map';
+// 引入全局变量和mixins方法
+@use '../../style/global_var.scss' as *;
+@use '../../style/mixins/mixins.scss' as *;
+@use '../../style/common/var.scss' as *;
+@use '../../style/mixins/var' as *;
+
+// 设置默认样式 .el-radio{} 需要一个$radio 里面包含radio可能会用到的各种属性和对应的全局值
+@include b(radio) {
+    @include set-component-css-var('radio', $radio) // set-component-css-var-->.el-radio-key:value
+}
+
+@include b(radio) {
+    // inline-flex 元素行为和行级元素一样 但是内容布局是和flex弹性盒子一样布局
+    display: inline-flex;
+    color: getCssVar('radio-text-color');
+    position: relative;
+    // 文字可能会出现换行 所以要求不换行
+    white-space: nowrap;
+    margin-right: 30px;
+    cursor: pointer;
+    // border: 1px solid black;
+    align-items: center;
+    user-select: none;
+    justify-content: center;
+
+    @include e(input) {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center
+    }
+    @include e(label){
+        padding-left: 8px
+    }
+    // 添加禁用状态 .el-radio.is-disabled 两个属性同时出现才行
+    @include when(disabled) {
+        // 禁用状态下的样式 
+        // 首先字体颜色要变化 所以先引入text-color-disabled的
+        @include css-var-from-global('radio-text-color', 'text-color-disabled');
+        cursor: not-allowed;
+
+        // 在disabled情况下 如果内部的元素被选中了 不仅需要改变label 还要改变inner
+        // 在这里再去定义inner的样式
+        .el-radio__inner {
+            cursor: not-allowed;
+            // 边框颜色也要改变
+            border-color: map-get($radio-disabled, 'border-color');
+            background-color: map-get($radio-disabled, 'bg-color');
+        }
+        .el-radio__label{
+            cursor: not-allowed;
+        }
+
+        @include when(checked) {
+            .el-radio__inner {
+                cursor: not-allowed;
+                // 边框颜色也要改变
+                border-color: map-get($radio-disabled, 'checked-border-color');
+                background-color: map-get($radio-disabled, 'checked-bg-color');
+            }
+        }
+    }
+
+    // 这是使用同时拥有.el-radio和.is-checked两个css类的父组件 然后再去定义.el-radio__inner 
+    // 这样就实现了checked样式 而且可以一次性定义 圆圈按钮和label的样式
+    @include when(checked) {
+
+        //  .el-radio.is-checked
+        //   以上面这两个为父类 然后子类是inner
+        .el-radio__inner {
+            // 在这里生成checked的样式
+            border-color: getCssVar("color-primary");
+            background-color: getCssVar("color-primary");
+
+            &::after {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        // 对应的文字颜色也需要改变
+        .el-radio__label {
+            color: getCssVar("radio-text-color"),
+        }
+    }
+
+    @include e(inner) {
+        // inner就是一个新的圆圈 在这里为了防止在不同的浏览器中 样式不同 所以要自己画一个圆圈
+        // 因为这个圆圈不能独占一行 所以得是行内元素 我们设定的是label
+        display: inline-block;
+        // 必须要有长宽高 所以这里设置为行内块元素
+        height: 13px;
+        width: 13px;
+        border-radius: 50%;
+        position: relative;
+        // border-color: black;
+        box-sizing: border-box;
+        margin-right: 5px;
+        border:getCssVar('radio-input-border');
+        // 然后在选中的状态下的话要有一个圆圈在中间 可以创建一个新的元素 让其在圆圈中间呆着
+        // 如何将其定位到inner中间呢？
+        &::after {
+            // 创建一个新的白色圆球
+            background-color: white;
+            height: 5px;
+            width: 5px;
+            content: '';
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.15s ease-in;
+        }
+        // 新增一个hover样式 而且这个hover只需要按钮显示就可以了
+        &:not(is-disabled)hover{
+            // hover的时候引入一个值来覆盖掉radio-input-border
+            border-color:getCssVar('radio-input-border-color-hover',)
+        }
+    }
+
+    @include e(original) {
+        opacity: 0;
+        outline: none;
+        position: absolute;
+        z-index: -1;
+    }
+}

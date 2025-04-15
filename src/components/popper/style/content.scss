@@ -1,0 +1,104 @@
+@use "../../../style/mixins/mixins.scss" as *;
+@use "../../../style/global_var.scss" as *;
+@use "../../../style/common/var.scss" as *;
+@use "../../../style/common/transition.scss" as *;
+@use "../../../style/mixins/var" as *;
+
+$effects: (dark, light);
+$isDark: (
+  "bg-color": getCssVar("text-color-primary"),
+  "text-color": white,
+  "border-color": getCssVar("text-color-primary"),
+);
+$isLight: (
+  // "bg-color": getCssVar("text-color-overlay"),
+  "bg-color": white,
+  "text-color": getCssVar("text-color-primary"),
+  "border-color": black
+);
+$arrow-border: (
+  "bottom": (
+    "right",
+    "bottom",
+  ),
+  "top": (
+    "left",
+    "top",
+  ),
+  "left": (
+    "left",
+    "bottom",
+  ),
+  "right": (
+    "right",
+    "top",
+  ),
+);
+@include b(popper-content) {
+  @include set-component-css-var("popper-content-dark", $isDark);
+  @include set-component-css-var("popper-content-light", $isLight);
+  @include set-component-css-var("popper-content", $popper-content);
+}
+// @include set-css-var-value("bg-color",getCssVar("text-color-primary"));
+// 背景颜色统一使用同一个变量
+@include b(popper-content) {
+  // 默认情况下就是黑色的 文字是白色的
+  //   在没有使用dark或者light的情况下 使用的是var全局变量
+  color: getCssVar("popper-content", "text-color");
+  background: getCssVar("popper-content", "bg-color");
+  // overflow: hidden;
+  position: absolute;
+  width: max-content;
+  min-width: 20px;
+  min-height: 20px;
+  font-weight: bold;
+  top: 0;
+  left: 0;
+  padding: 5px 11px;
+  border-radius: 4px;
+  font-size: 90%;
+
+  $arrow-selector: #{& + "__arrow"};
+  @each $effect in $effects {
+    @include when($effect) {
+      // 背景颜色是黑色 对应text-color-primay
+      @include set-css-var-value(
+        ("popper-content", "bg-color"),
+        getCssVar("popper-content-#{$effect}-bg-color")
+      );
+      @include set-css-var-value(
+        ("popper-content", "text-color"),
+        getCssVar("popper-content-#{$effect}-text-color")
+      );
+      @include set-css-var-value(
+        ("popper-content", "border-color"),
+        getCssVar("popper-content-#{$effect}-border-color")
+      );
+      border: 1px solid getCssVar("popper-content-border-color");
+
+    }
+  }
+  @include e(arrow) {
+    position: absolute;
+    z-index: 20;
+    width: 8px;
+    height: 8px;
+    transform: rotate(45deg);
+    border: 1px solid getCssVar("popper-content-border-color");
+    // 当为left和top的时候
+    // border要改一下 不是每条边都需要颜色
+    background: getCssVar("popper-content-bg-color");
+    @each $placement, $transparent_border in $arrow-border {
+      &[data-popper-arrow^="#{$placement}"] {
+        @each $border in $transparent_border {
+          border-#{$border}: transparent;
+        }
+      }
+    }
+  }
+  @include when(pure) {
+    padding: 0;
+  }
+  // element-plus使用的是属性选择器 &[属性名^=属性开头名称]{}
+  // 但是这样怎么知道 当前的placement是哪个呢？floating-ui应该考虑到了
+}

@@ -1,0 +1,18 @@
+@use "../../../style/mixins/mixins.scss" as *;
+@use "../../../style/mixins/var" as *;
+// @use "../../../style/global_var.scss" as *;
+@use "../../../style/common/var.scss" as *;
+
+// 默认自定义样式
+@include b(cascader-panel){
+
+}
+@include b(cascader-panel){
+    display: flex;
+    // border: 1px solid black;
+    // 还需要给menu生成一个类，
+}
+@include b(cascader-menu){
+    // menu应该填充满tooltip  不应该有边界 有边界是因为tooltip设置了边界
+    border-right: 1px solid black;
+}

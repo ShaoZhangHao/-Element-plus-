@@ -1,0 +1,111 @@
+// 接收一个值 然后生成一个 父CSS.is-plain的CSS选择器 el-button.is-plain的选择器
+// .is-plain:{ content } .is-loading:{content}
+@use '../common/config.scss' as *;
+@forward "./function" ;
+@use 'sass:map';
+@use 'sass:color';
+// @use './function.scss' as *;
+
+$B:null;
+
+@mixin when($state) {
+  @at-root {
+    &.#{$state-prefix + $state} {
+      @content;
+    }
+  }
+}
+
+;
+
+// 生成 .el-button{ css样式}
+@mixin b($block) {
+  $B : $namespace + '-' + $block !global;
+
+  .#{$B} {
+    @content;
+  }
+}
+
+@mixin e($element) {
+  $currentSelector: '';
+  $selector: &;
+
+  //  有可能当前输入的element是一个列
+  // 列表中的每一个ele 都要生成一个.el-block--element, .el-block--element 因为可以是多个element用同一种
+  // $B是因为一定使用了b()函数 引入了$B变量 所以可以使用 最后的结果就是
+  @each $unit in $element {
+    $currentSelector: #{$currentSelector + "." +
+ $B+ "__" + $unit + ','
+  }
+
+  ;
+
+  @if hitAllSpecialNestRule($selector) {
+    @at-root {
+      #{$selector} {
+        #{$currentSelector} {
+          @content;
+        }
+      }
+    }
+  } @else {
+    @at-root {
+      #{$currentSelector} {
+        @content;
+      }
+    }
+  }
+}
+}
+@mixin inset-input-border($color, $important: false) {
+  @if $important == true {
+    box-shadow: 0 0 0 1px $color inset !important;
+  } @else {
+    box-shadow: 0 0 0 1px $color inset;
+  }
+}
+// @mixin m($modifier){
+//   $B : $namespace + '--' +$modifier;
+//   .#{$B} {
+//     @content
+//   }
+// }
+
+// m方法 生成一个&--modifier:{ @content}
+@mixin m($modifier) {
+  $selector: &;
+  $currentSelector: '';
+
+  // $modifier可以是一个普通数据，也可以是一个列表
+  @each $unit in $modifier {
+    $currentSelector : #{ $currentSelector + $selector + '--' + $unit + ','} // 同时生成多个类名 用,分割
+  }
+
+
+  @at-root {
+    #{$currentSelector} {
+      @content
+    }
+  }
+}
+
+;
+
+// 返回一个box-shadow属性作为边框  只需要输入一个颜色即可
+@mixin inset-input-border($color, $important: false) {
+  @if $important ==true {
+    box-shadow: 0 0 0 1px $color inset !important
+  }
+
+  @else {
+    box-shadow: 0 0 0 1px $color inset;
+  }
+}
+
+@mixin button-size($padding-vertical,$padding-horizontal,$font-size,$border-radius){
+  padding:$padding-vertical $padding-horizontal;
+  font-size:$font-size;
+  border-radius: $border-radius;
+
+}

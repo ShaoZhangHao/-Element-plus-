@@ -1,0 +1,115 @@
+@use "../../style/mixins/mixins.scss" as *;
+@use "../../style/mixins/var.scss" as *;
+@use "../../style/common/var.scss" as *;
+@use "../../style//global_var.scss" as *;
+// @include b('input') {
+//     // $input在common/var.scss中
+//     @include set-component-css-var('input', $input) // 这里生成.el-input{--el-input-xxx:var(来自global的全局var变量)}
+// }
+
+// 然后在这定义css属性 属性值 要么是真实的css属性 要么是var去使用当前页面定义的内容
+// 使用var的一般都是会根据输入的内容改变的
+// @include b('input') {
+//     // 基础用法：点击输入框后 边框会变成蓝色 默认情况下是黑色
+//     // var(--el-input-border-color
+//     border-color: getCssVar('input', 'border-color')
+// }
+@include b("input") {
+  // generate --el-input-key : value
+  @include set-component-css-var("input", $input);
+}
+
+@include b("input") {
+  // --el-input-width:--el-component-size
+  // 默认样式基本就做好了 剩下的都是新增了其他属性的
+  @include css-var-from-global("input-height", "component-size");
+  // 给外边表单div
+  display: inline-flex;
+  position: relative;
+  font-size: getCssVar("font-size", "base");
+  width: getCssVar("input-width");
+  // box-sizing用于定义如何计算该盒模型的总高度和宽度
+  box-sizing: border-box;
+  vertical-align: middle;
+  cursor: pointer;
+  // border: 1px solid blue;
+  transition: getCssVar("transition-box-shadow");
+  transform: translate3d(0, 0, 0);
+  border-radius: getCssVar("border-radius", "base");
+  @include e(wrapper) {
+    display: inline-flex;
+    width:max-content;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    cursor: text;
+    @include when(focus) {
+      outline: none;
+      @include inset-input-border(#{getCssVar("color-primary")});
+    }
+  }
+
+  @include e(inner) {
+    width: 100%;
+    //   当有前后缀的时候 同时宽度没有填满div 那就回用flex-gorw 去瓜分剩余空间
+    flex-grow: 1;
+    font-size: inherit;
+    border: none;
+    outline: none;
+    background: none;
+    box-sizing: border-box;
+    cursor:inherit;
+    &:focus {
+      outline: none;
+      //   @include inset-input-border(getCssVar('color-primary'))
+    }
+  }
+
+  // 默认情况下的box-shadow
+  @include inset-input-border(
+    #{getCssVar("input", "border-color")}
+  ); // 给外面的div新增一个hover样式 还有border样式
+
+  // hover时的颜色
+  // 需要引入:hover 应该是直接&：hover
+  // &:hover {
+  //     // 这个#{}具体要什么时候使用？
+  //     @include inset-input-border(#{getCssVar('input', 'hover-border-color')})
+  // }
+
+  @include when(focus) {
+    @include inset-input-border(#{getCssVar("input", "focus-border-color")});
+  }
+  @include when(disabled) {
+    background-color: rgb(194, 189, 189);
+    cursor: not-allowed;
+    // 这里使用disabled的结果就是只有wrapper的范围是not-allowed 而其他input或者suffix都是原本的样式
+    // 所以要给他们全部都使用这个disabled 或者使用伪元素在他们上面否覆盖一层然后使用not allowed
+  .el-input__inner{
+    cursor: not-allowed;
+  }
+  .el-input__wrapper{
+    cursor: not-allowed;
+  }
+  }
+}
+
+@include b("input-group") {
+  display: inline-block;
+  width: 100%;
+  // stretch的作用是 多个元素的大小小于container的大小时候，其中可以自动调节大小的元素将等量增大来填满容器，保持其宽高比例
+  align-items: stretch;
+
+  @include e(("append", "prepend")) {
+    // .el-input-group-prepend
+    // 前缀空间的样式
+    background-color: getCssVar("fill-color", "light");
+    color: getCssVar("color-info");
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    white-space: nowrap;
+  }
+}

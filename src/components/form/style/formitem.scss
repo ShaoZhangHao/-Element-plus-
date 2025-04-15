@@ -1,0 +1,77 @@
+@use "../../../style/mixins/mixins.scss" as *;
+@use "../../../style/global_var.scss" as *;
+@use "../../../style/common/var.scss" as *;
+@use "../../../style/common/transition.scss" as *;
+@use "../../../style/mixins/var" as *;
+
+@use "sass:map";
+$form-item-margin-bottom: (
+  "default": 18px,
+);
+$form-item-line-height: (
+  "default": 32px,
+);
+$form-item-padding-top: (
+  "default": 2px,
+);
+
+@include b(form){
+  @include m(inline){
+    .el-form-item{
+      // 将FormItem组件设置为行内元素 宽度只会和内容物宽度有关 并且可以和其他的内联元素并排
+      display: inline-flex;
+      vertical-align: middle;
+    }
+  }
+};
+
+
+@include b(form-item) {
+  // 自定义var变量
+}
+@include b(form-item) {
+  display: flex;
+  justify-content: center;
+  margin-bottom: #{map.get($form-item-margin-bottom, "default")};
+  @include e(error) {
+    // 1.字体颜色
+    color: getCssVar("color-danger");
+    font-size: 12px;
+    // line-height用于控制多行元素的行间距
+    line-height: 1;
+    // 预留一部分空间给文字
+    position: absolute;
+    padding-top: #{map.get($form-item-padding-top, "default")};
+   
+  }
+  @include when(error) {
+    .el-input__wrapper {
+      &,
+      &:focus,
+      &.is-focus {
+          box-shadow: 0 0 0 1px getCssVar('color-danger') inset;
+      }
+    }
+    .el-input__validateIcon {
+        color: getCssVar('color-danger');
+      }
+  }
+@include e(label){
+  display: inline-flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding:0 12px 0 0
+}
+
+  @include m(label-left){
+    justify-content: flex-start;
+  }
+  @include m(label-top){
+    // justify-content: flex-start;
+    display: block;
+  }
+  @include m(label-right){
+    justify-content: flex-end;
+  }
+}
+// 要引入transition样式

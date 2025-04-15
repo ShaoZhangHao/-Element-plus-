@@ -1,0 +1,9 @@
+// b对应BEM命名规则的 只有block为属性名的的CSS选择器
+// 只需要前缀(命名空间)+block
+
+// global在这里有什么用？
+// e是指子元素 只是给某个子元素的属性 
+@mixin e($element){
+    $E:$element !global;
+    $selector:& ;
+}

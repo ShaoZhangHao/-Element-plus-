@@ -1,0 +1,23 @@
+@use "../../style/mixins/mixins.scss" as *;
+@use "../../style/global_var.scss" as *;
+@use "../../style/common/var.scss" as *;
+@use "../../style/common/transition.scss" as *;
+@use "../../style/mixins/var" as *;
+
+@include b(Cascader) {
+  &:not(is-disabled):hover {
+    // 在没有disabled下的hover时的样式
+    .el-input__wrapper {
+      cursor: pointer;
+      box-shadow: 0 0 0 1px green inset;
+    }
+  }
+  .el-input {
+    @include when(focus) {
+      // 这里的样式会被透传到内部的div上
+      .el-input__wrapper {
+        box-shadow: 0 0 0 1px getCssVar("color-primary") inset;
+      }
+    }
+  }
+}

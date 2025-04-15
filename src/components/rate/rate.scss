@@ -1,0 +1,95 @@
+@use "../../style/mixins/mixins.scss" as *;
+@use "../../style/common/var.scss" as *;
+@use "../../style/global_var.scss" as *;
+@use "../../style/mixins/var" as *;
+@use "../../style/mixins/function" as *;
+@use "sass:map";
+@use "sass:color";
+// .try {
+//   position: absolute;
+//   top: 10px;
+// }
+
+$cursor: (
+  "default": pointer,
+  "disabled": not-allowed,
+);
+@include b(rate) {
+  @include set-component-css-var("rate", $rate);
+  @include set-component-css-var("rate-cursor", $cursor);
+}
+
+@include b(rate) {
+  // width:0;
+  margin-left: 0;
+  justify-content: flex-start;
+  display: inline-flex;
+  align-items: center;
+  // position: relative;
+  // border: 1px solid green;
+  @include e(item) {
+    font-size: 20px;
+    vertical-align: middle;
+    cursor: getCssVar("rate-cursor");
+    display: inline-block;
+    // margin-right: 5px;
+    position: relative;
+    // display: inline-block;
+    & .#{bem("rate","icon")} {
+      // border:1px solid black;
+      // height: max-content;
+      // vertical-align: center;
+      transition: all 0.1s;
+      overflow: hidden;
+      display: inline-flex;
+      position: relative;
+      margin-right: 5px;
+      // 不能用flex 因为在flex布局下的宽度变化是直接从中心向外扩展或者两边同时向内
+      // 这样就不能出现一半个ICON的样式
+  
+      & .is-active {
+        color: getCssVar("rate-fill-color");
+      }
+      overflow: hidden;
+      &.hover {
+        transform: scale(1.15);
+      }
+    }
+    @include e(decimal) {
+      // border-right: 1px solid black;
+      display: inline-flex;
+      overflow: hidden;
+      // justify-content: center;
+      // align-items: center;
+      height: 100%;
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      left: 0;
+    }
+  }
+  @include e(box){
+    overflow: hidden;
+  }
+  @include e(text) {
+    text-align: left;
+    text-wrap: nowrap;
+    // position: absolute;
+    // border: 1px solid red;
+    vertical-align: middle;
+  }
+  @include when(disabled) {
+    @include e(item) {
+      cursor: not-allowed;
+      //   color: getCssVar('rate', 'disabled-void-color');
+    }
+  }
+}
+  //    @include when(disabled){
+  //     // 写在这里的话 优先级不够高 item内的优先级更高 cursor:pointer会覆盖之类的disabled
+  //     // 做法1： 将里面的cursor都替换成var变量 然后根据disabled决定使用哪种
+  //     // @include set-css-var-value('rate-cursor',getCssVar('rate-cursor-disabled'))
+  //     @include e(item){
+  //         // .el-rate.is-disabled__item
+  //     }
+  // }

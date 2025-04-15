@@ -1,0 +1,45 @@
+// 定义全局通用样式
+@use 'common/var.scss' as *;
+// 在common的var.scss文件中 除了设置map 列表 也要设置一些css默认值
+// 然后从common/var中取出在global_var上挂载在root上给全部的值使用。
+@use 'mixins/mixins.scss' as *;
+@use 'mixins/var' as *;
+
+// :root是根元素 将自定义属性设置在这上面 在所有地方就都可以使用 并且只需要修改种类一个地方就可以修改所有内容
+// set-css-var-value(border.getcssvar1 getcssvar2)===>--el-border:var(--el-border-width) var(--el-border-style)
+:root {
+    // color 
+    @include set-css-var-value('color-white', $color-white);
+    // font-weight全局样式
+    // @include set-css-var-value('font-weight-')
+    // 设置全局border样式
+    @include set-css-var-value('border-width', $border-width);
+    @include set-css-var-value('border-style', $border-style);
+    @include set-css-var-value('border', getCssVar('border-width') getCssVar('border-style'));
+    @include set-css-var-value('bg-color', white);
+    // @include set-css-var-value('color-primary', map-get($colors, 'primary'));
+    @include set-component-css-var('fill-color', $fill-color);
+    @include set-component-css-var('text-color', $text-color);
+    @include set-component-css-var('border-color', $border-color);
+    @include set-component-css-var('mask-color', $mask-color);
+    @include set-component-css-var('border-radius', $border-radius);
+    @include set-component-css-var('font-size', $font-size);
+    @include set-component-css-var('component-size', $common-component-size);
+
+    @include set-component-css-var('transition-duration', $transition-duration);
+
+    @include set-component-css-var('transition-function', $transition-function);
+    @include set-component-css-var('transition', $transition);
+    // .elddd {
+    //     transition: map-get($transition, 'all')
+    // }
+
+    // @include set-component-css-var('transition', $transition);
+
+    @each $type in ('primary', 'success', 'warning', 'danger') {
+        @include set-css-color-type($colors, $type);
+    }
+
+    @include set-css-var-value('border-color-hover', $border-color-hover) ;// @include set-css-var-value('size', map-get($common-component-size, "default"))
+   @include set-css-var-value('border',getCssVar('border-width') getCssVar('border-style') getCssVar('border-color') )
+}

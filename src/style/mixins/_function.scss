@@ -1,0 +1,80 @@
+@use "../common/config.scss";
+@use "sass:string";
+@use "sass:meta";
+
+@function joinVarName($list) {
+  $name: "--" + config.$namespace;
+
+  @each $item in $list {
+    @if $item != "" {
+      $name: $name + "-" + $item;
+    }
+  }
+
+  @return $name;
+}
+
+// getCssVarName('button', 'text-color') => '--el-button-text-color'
+@function getCssVarName($args...) {
+  @return joinVarName($args);
+}
+
+// getCssVar('button', 'text-color') => var(--el-button-text-color)
+// @function getCssVar($args...) {
+//   @return var(#{joinVarName($args)});
+// }
+
+@function bem($block, $element: "", $modifier: "") {
+  $name: "el-" + $block;
+  @if $element != "" {
+    $name: $name + "__" + $element;
+  }
+  @if $modifier != "" {
+    $name: $name + "--" + $modifier;
+  }
+  @return $name;
+}
+// BEM support Func
+@function selectorToString($selector) {
+  $selector: meta.inspect($selector);
+  $selector: string.slice($selector, 2, -2);
+  @return $selector;
+}
+
+@function containsModifier($selector) {
+  $selector: selectorToString($selector);
+
+  @if string.index($selector, "--") {
+    @return true;
+  } @else {
+    @return false;
+  }
+}
+
+@function containWhenFlag($selector) {
+  $selector: selectorToString($selector);
+
+  @if string.index($selector, '.' + config.$state-prefix) {
+    @return true;
+  } @else {
+    @return false;
+  }
+}
+
+@function containPseudoClass($selector) {
+  $selector: selectorToString($selector);
+
+  @if string.index($selector, ':') {
+    @return true;
+  } @else {
+    @return false;
+  }
+}
+
+@function hitAllSpecialNestRule($selector) {
+  @return containsModifier($selector) or containWhenFlag($selector) or
+    containPseudoClass($selector);
+}
+@function getCssVar($args...) {
+  @return var(#{joinVarName($args)});
+}

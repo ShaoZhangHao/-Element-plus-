@@ -1,0 +1,52 @@
+@use "../../../style/mixins/mixins.scss" as *;
+@use "../../../style/mixins/var" as *;
+// @use "../../../style/global_var.scss" as *;
+@use "../../../style/common/var.scss" as *;
+@use "../../../style/global_var.scss" as *;
+
+@include b(cascader-node) {
+  @include set-component-css-var("cascader", $cascader);
+}
+@include b(cascader-node) {
+  cursor: pointer;
+  padding: 0 30px 0 20px;
+  height: 34px;
+  line-height: 34px;
+  // overflow: hidden;
+  &:not(.is-disabled) {
+    &:hover,
+    &:focus {
+      background: getCssVar("cascader-node", "bg-color", "hover");
+    }
+  }
+
+  &.in-active-path {
+    color: getCssVar("cascader-menu", "selected-text-color");
+    font-weight: bold;
+  }
+  &.in-checked-path{
+    color: getCssVar("cascader-menu", "selected-text-color");
+    font-weight: bold;
+  }
+  @include when(checked) {
+    color: getCssVar("cascader-menu", "selected-text-color");
+    font-weight: bold;
+  }
+  @include when(disabled) {
+    cursor: not-allowed;
+    color: getCssVar("cascader-node", "color-disabled");
+  }
+  .is-loading{
+    animation: spin 1s linear infinite;
+    @keyframes spin {
+      from{
+        transform: rotate(0deg);
+      }
+      to{
+        transform: rotate(360deg);
+      }
+
+      
+    }
+  }
+}

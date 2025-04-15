@@ -1,0 +1,176 @@
+@use "../../style/mixins/mixins.scss" as *;
+@use "../../style/common/var.scss" as *;
+@use "../../style/mixins/var" as *;
+@use "sass:map";
+@use "sass:color";
+// 不同尺寸下会用到的大小
+$switch-border-radius: (
+  "default": 10px,
+  "circle": 50%,
+  "small": 8px,
+  "large": 12px,
+);
+
+// 不同size下的大小
+$switch-button-size: (
+  "default": 16px,
+  "small": 12px,
+  "large": 20px,
+);
+$switch-core-width: (
+  "large": 50px,
+  "default": 40px,
+  "small": 30px,
+);
+$switch-core-height: (
+  "large": 24px,
+  "default": 20px,
+  "small": 16px,
+);
+$switch-content-padding: (
+  "large": 6px,
+  "default": 4px,
+  "small": 2px,
+);
+// 和药丸边界的距离
+$switch-button-distance: 3px;
+$switch:(
+    "bg-color":rgb(180, 180, 180),
+    "bg-color-checked":getCssVar("color-primary"),
+);
+// 引入大小
+@include b(switch) {
+  // 引入不同尺寸的名称
+  @include set-component-css-var("switch-border-radius", $switch-border-radius);
+  @include set-component-css-var("switch-button-size", $switch-button-size);
+  @include set-component-css-var("switch-core-width", $switch-core-width);
+  @include set-component-css-var("switch-core-height", $switch-core-height);
+  @include set-component-css-var("switch",$switch)
+}
+@include b(switch) {
+
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+  @include when(disabled){
+   & .el-switch__core,
+   & .el-switch__lable {
+      cursor: not-allowed
+   }
+  };
+  @include e(core) {
+    position: relative;
+    display: inline-flex;
+    border-radius: getCssVar("switch-border-radius");
+    height: getCssVar("switch-core-height");
+    width: getCssVar("switch-core-width");
+    overflow: hidden;
+    background-color: rgb(180, 180, 180);
+    transition: background-color 0.2s;
+    align-items: center;
+    box-sizing: border-box;
+    cursor: pointer;
+    .el-switch__action {
+      width: getCssVar("switch-button-size");
+      height: getCssVar("switch-button-size");
+      background-color: white;
+      position: absolute;
+      left: $switch-button-distance;
+      border-radius: getCssVar("switch-border-radius", "circle");
+      transition: all 0.3s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: getCssVar("switch-button-size");
+    }
+  }
+
+  @include e(inner) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100%;
+    // text-wrap: nowrap;
+    position: relative;
+    transition: all 0.3s;
+    height: map.get($switch-button-size,'default');
+    color: white;
+    // border: 1px solid black;
+    // 增加一个padding来扩充button的大小
+    // left: calc(#{getCssVar("switch-button-size")} + #{$switch-button-distance} + 1px);
+    // 在默认情况下 文字应该距离左边边界 button-size + button-distance + fixed
+    padding: 0 4px 0 calc(getCssVar("switch-button-size") + 4px);
+    .is-text {
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      //   color: black;
+    }
+  }
+  @include when(checked) {
+    .el-switch__core {
+      background-color: getCssVar("color-primary");
+    }
+    .el-switch__action {
+      left: calc(100% - getCssVar("switch-button-size") - 3px);
+      color:getCssVar("color-primary");
+    }
+    // 在checked的情况下 label的颜色要改变 并且不能是全部改变 只能是其中一遍改变
+    // 这就要用left和right
+    .el-switch__inner {
+      padding: 0 calc(#{map.get($switch-button-size, "default")} + 4px) 0 3px;
+    }
+  }
+  @include e(label) {
+    // label文字会统一有一个颜色的改变
+    transition: all 0.3s;
+    font-weight: 500;
+    height:map.get($switch-core-height,'default');
+    // position: absolute;
+    // 文字也是可以点击的
+    cursor: pointer;
+    @include m(left) {
+      padding-right: 10px;
+    }
+    @include m(right) {
+      padding-left: 10px;
+    }
+    @include when(active) {
+      color: getCssVar("color-primary");
+    }
+  }
+  @each $size in ("large", "small") {
+    @include m(#{$size}) {
+      // 改变大小
+      // button的size
+      @include set-css-var-value(
+        "switch-button-size",
+        getCssVar("switch-button-size", $size)
+      );
+      // 药丸的宽高
+      @include set-css-var-value(
+        "switch-core-height",
+        getCssVar("switch-core-height", $size)
+      );
+      @include set-css-var-value(
+          "switch-core-width",
+          getCssVar("switch-core-width", $size)
+        );
+    @include set-css-var-value(
+        "switch-border-radius",
+        getCssVar("switch-border-radius",$size)
+    )
+        // 文字大小
+        // padding间距
+;
+    }
+  }
+  @include when(disabled){
+  // 整体颜色变透明
+  opacity: 0.6;
+  }
+  //   @include m()
+}

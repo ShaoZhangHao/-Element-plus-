@@ -1,0 +1,244 @@
+@use "sass:map";
+@use "../../style/common/var.scss" as *;
+@use "../../style/mixins/var.scss" as *;
+@use "../../style/common/config.scss" as *;
+@use "../../style/mixins/mixins.scss" as *;
+@use "../../style/mixins/button.scss" as *;
+
+// $col:map-merge($lists,());
+// 默认背景颜色
+// 针对于不同的type和同时使用了 type plain 以及round的样式 都需要不同的CSS选择器
+// 我的做法是 给每一种组合都生成一种css样式，但是会重复。
+// type和plian组合的话一定要重复
+// 生成button的默认自定义属性键值对 所以利用var()从默认自定义属性中获取变量时是不需要-button的
+// --el-button-font-weight:var(--el-font-weight)
+// --el-button-bg-color:var(--el-bg-color)
+// 那问题来了--el-bg-color是在哪里生成的 从哪里去获取
+// @include b(button){
+//     // 生成css自定义属性名 --el-button-$button中的key值 : $button中的所有value
+//     @include set-component-css-var('button' , $button)
+// };
+// 生成el-button:{CSS属性}
+// 这里会遍历$button列表里的键值对 生成el-button-key:var(xxx) var变量是从全局中获取的
+@include b("button") {
+  @include set-component-css-var("button", $button)
+    // $button是一个列表 里面有默认样式
+;
+}
+
+// 生成el-button{ diaplay:flex....} 到这里都是设置el-button的默认样式
+// 如果要设置type颜色呢？
+@include b("button") {
+  // button内部是一个弹性盒子 内部元素上下左右居中 //
+  display: inline-flex;
+  // 左右居中
+  justify-content: center;
+  // 上下居中
+  align-items: center;
+  vertical-align: middle;
+  // 行高;
+  line-height: 1;
+  box-sizing: border-box;
+  // button的高度 用默认值--前提是有默认值
+  height: map-get($common-component-size, "default");
+  white-space: nowrap;
+  text-align: center;
+  outline: none;
+
+  // border:none;
+  // border: none;
+  // border-style: none;
+  box-shadow: none;
+  // border-style: solid;
+  border: getCssVar("border");
+  border-color: getCssVar("button", "border-color");
+  // border:1px solid getCssVar('button', 'border-color'); // 以下所有getCssvar 都是从自定义属性中取到值，如果说另外使用了type 就会新增一系列的自定义属性 然后覆盖掉前面的自定义属性
+  // getCssVar var(--el-button-text-color) 这种button是从useButtonCustomstyle中获取的 useButtonCustomstyle是默认样式
+  color: getCssVar("button", "text-color");
+  // 那默认值是什么？ 我写在哪里了 --el-button-bg-color
+  background-color: getCssVar("button", "bg-color");
+  //
+  @include button-size(
+    map.get($button-padding-vertical, "default")-$button-border-width,
+    map.get($button-padding-horizontal, "default")-$button-border-width,
+    map.get($button-font-size, "default"),
+    map.get($button-border-radius, "default")
+  );
+  & + &{
+    margin-left: 12px;
+  }
+  // 生成默认hover样式
+  &:hover {
+    // var(--el-button-hover-text-color) 应该实在button-custom中
+    color: getCssVar("button", "hover", "text-color");
+    // 这些样式都写在哪里了？ 应该都是--el-button-hover-border-color 应该都是统一放在一个地方的
+    // 除了当前页面的下面会生成是针对使用了某些属性
+    //  还有就是在button.js中放在了style上 也是在该组件下的全局属性
+    // 还有就是:root 在根元素上写的自定义属性
+    border-color: getCssVar("button", "hover-border-color");
+    background-color: getCssVar("button", "hover", "bg-color");
+    // outline: none;
+  }
+  &:active {
+    border-color: getCssVar("button", "active", "border-color");
+    // 背景颜色
+    background-color: getCssVar("button", "active", "bg-color");
+  }
+  @include when(plain) {
+    // 1. 先覆盖--el-button-hover-bg-color 改变的是hover时候的颜色
+    // 生成 --el-button-hover-text-color:var(--el-color-primary)
+    @include css-var-from-global(
+      ("button", "hover", "text-color"),
+      ("color", "primary")
+    );
+    // 默认模式下plain的边框只有在hover的时候会变 active时候也是一样的 所以要覆盖
+    @include css-var-from-global(
+      ("button", "hover", "bg-color"),
+      ("fill-color", "blank")
+    );
+    @include css-var-from-global(
+      ("button", "active", "border-color"),
+      ("color", "primary")
+    );
+  }
+
+  // var(--el-border) --el-button-border-color是从上面那个b函数遍历$button获取的
+  // border-color: getCssVar('button', 'border-color');
+
+  // 在button下定义不同type需要的自定义属性 并从global上获取默认值
+  // 当组件使用了el-button-primary的时候 就会使用对应的自定义属性类 覆盖掉前面的内容
+  // 我现在使用type-primary 要覆盖掉--el-button-
+  @each $type in (primary, success, warning, danger, info) {
+    @include m($type) {
+      @include button-variant($type)
+        // type一共有5种 给每一种都生成一个css选择器 el-button--success{}
+        // ;
+;
+    }
+  }
+
+  @include when(round) {
+    border-radius: getCssVar("border-radius", "round");
+  }
+
+  // 使用when方法 生成一个新的类.#{stateprifix}-state:{里面只用写circle相关的一些属性}
+  @include when(circle) {
+    border-radius: 50%;
+    // 还要设置高度和宽度
+    width: map.get($input-height, "default");
+    overflow: hidden;
+    // background-color: black;
+  }
+
+  // 朴素按钮是在默认情况 以及 hover情况下颜色发生反过来 所以将原本的
+  // background-color:var(--el-button-bg-color)的var值覆盖掉
+  // --el-button-bg-color:另一个值 从global中获取
+  // hover伪类{background-color:var(--el-button-hover-bg-color}的值也覆盖掉
+
+  @each $size in (large, small) {
+    //    生成.el-button--large{自定义属性} //里面需要哪些自定义属性？
+    @include m($size) {
+      //@content
+      // 根据large和small生成 --el-button-large:var(--el-large)
+      // set-css-var-value是生成自定义属性键值对 所以得到的是--el-button-large: 40px
+      // --el-button-default: 32px
+      // --el-button-small: 24px
+      // 上面使用的是默认值，然后下面这里新加入的自定义属性给height使用 然后会覆盖掉默认值
+      @include set-css-var-value(
+        ("button", "size"),
+        map-get($common-component-size, $size)
+      ); //
+      // 从全局var中拿到large和small的值
+      // getCssVar 先经过joinvarname:--el-button-size
+      // 然后返回 var(--el-button-size)
+      height: getCssVar("button", "size");
+
+      & {
+        @include button-size(
+          map.get($button-padding-vertical, $size) - $button-border-width,
+          map.get($button-padding-horizontal, $size) - $button-border-width,
+          map.get($button-font-size, $size),
+          map.get($button-border-radius, $size)
+        );
+      }
+      @include when(circle) {
+        width: getCssVar("button", "size");
+        padding: map.get($button-padding-vertical, $size) - $button-border-width;
+      }
+    }
+  }
+
+  //生成.el-button.is-loading
+  @include when(loading) {
+    position: relative;
+    // 不会触发事件
+    pointer-events: none;
+
+    // 伪元素选择器
+    &:before {
+      // mask the button
+      z-index: 1;
+      // z轴生效的前提是开启层叠上下文
+      position: absolute;
+      pointer-events: none;
+      content: "";
+      left: -1px;
+      top: -1px;
+      right: -1px;
+      bottom: -1px;
+      // 向上查找圆角数据 并继承
+      border-radius: inherit;
+      background-color: getCssVar(
+        "mask-color",
+        "extra-light"
+      ); //getCssVar --el-mask-color-extra-light 其中没有button 所以是从global上获取的
+    }
+    @include e(loading) {
+      // 旋转样式 添加动画 先设置keyframe
+      animation: spin 1s linear infinite;
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    }
+  }
+
+  // 新增disabled的样式
+  @include when(disabled) {
+    &,
+    &:hover {
+      color: getCssVar("button", "disabled", "text-color");
+      cursor: not-allowed;
+      background-image: none;
+      background-color: getCssVar("button", "disabled", "bg-color");
+      border-color: getCssVar("button", "disabled", "border-color");
+    }
+  }
+
+  @include when(text) {
+    // 1.征程模式下没有背景
+    background-color: transparent;
+    // 覆盖原本的hover样式 优先级更高 引入var变量
+    border-color: transparent;
+    color: getCssVar("button", "text-color");
+    &:hover {
+      background-color: getCssVar("fill-color", "light");
+    }
+    &:active {
+      background-color: getCssVar("fill-color");
+    }
+    @include when("has-bg") {
+      background-color: getCssVar("fill-color", "light");
+      &:hover {
+        background-color: getCssVar("fill-color");
+      }
+      &:active {
+        background-color: getCssVar("fill-color", "dark");
+      }
+    }
+  }
+}
